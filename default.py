@@ -25,7 +25,7 @@ import xbmcaddon
 # Shared resources
 addonPath = ''
 #addon = xbmcaddon.Addon(id='script.games.rom.collection.browser')
-addon = xbmcaddon.Addon(id='script.rss.viewcontent')
+addon = xbmcaddon.Addon(id='script.rss.explorer')
 
 addonPath = addon.getAddonInfo('path')
 
