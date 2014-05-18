@@ -39,8 +39,7 @@ class UIGameDB(xbmcgui.WindowXML):
             self.setFocus(focusControl)
 
     def onClick(self, controlId):
-        util.Logutil.log("onClick: " + str(controlId), util.LOG_LEVEL_DEBUG)
-        
+        #print "onClick: " + str(controlId)
         if (controlId in GAME_LISTS):
             self.launchEmu()
 
@@ -93,7 +92,7 @@ class UIGameDB(xbmcgui.WindowXML):
         except Exception, (exc):
             # There seems to be a problem with recognizing the scrollbar controls
             if(controlId not in (CONTROL_SCROLLBARS)):
-                Logutil.log("Control with id: %s could not be found. Check WindowXML file. Error: %s" % (str(controlId), str(exc)), util.LOG_LEVEL_ERROR)
+                #print "Control with id: %s could not be found. Check WindowXML file. Error: %s" % (str(controlId), str(exc))
                 self.writeMsg(util.localize(35025) % str(controlId))
             return None
         return control
