@@ -11,20 +11,15 @@
 # You should have received a copy of the GNU General Public License along with this program; 
 # if not, see <http://www.gnu.org/licenses/>.
 
-
-# I have built this script from scratch but you will find some lines or ideas that are taken 
-# from other xbmc scripts. Some basic ideas are taken from Redsandros "Arcade Browser" and I often 
-# had a look at Nuka1195's "Apple Movie Trailers" script while implementing this one. Thanks for your work!
-
-
+# The GUI is heavily inspired by script.games.rom.collection.browser.
 
 import os, sys, re
+
 import xbmcaddon
 
 
 # Shared resources
 addonPath = ''
-#addon = xbmcaddon.Addon(id='script.games.rom.collection.browser')
 addon = xbmcaddon.Addon(id='script.rss.explorer')
 
 addonPath = addon.getAddonInfo('path')
@@ -51,14 +46,5 @@ if re.match("Linux", env):
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "platform_libraries", env ) )
 
-
-class Main():
-    
-    def __init__(self):
-        print 'RCB: sys.argv = ' +str(sys.argv)
-        import gui
-        return
-
-if ( __name__ == "__main__" ):
-    print 'RCB started'
-    Main()
+if __name__ == '__main__':
+    import gui
