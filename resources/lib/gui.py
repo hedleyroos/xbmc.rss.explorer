@@ -48,6 +48,7 @@ NON_EXIT_RCB_CONTROLS = (500, 600, 700, 800, 900, 2, 1000, 1100)
 CONTROL_LABEL_MSG = 4000
 CONTROL_BUTTON_MISSINGINFODIALOG = 4001
 
+ACTION_PREVIOUS_MENU = 10
 
 class MyPlayer(xbmc.Player):
     
@@ -61,6 +62,18 @@ class MyPlayer(xbmc.Player):
             return
         
         self.gui.setFocus(self.gui.getControl(CONTROL_GAMES_GROUP_START))
+
+
+class PopupWindow(xbmcgui.Window):
+
+    def __init__(self, *args, **kwargs):
+        super(PopupWindow, self).__init__(*args, **kwargs)
+        self.url = kwargs.pop('url')
+        self.addControl(xbmcgui.ControlLabel(x=190, y=25, width=500, height=25, label="Noooo " + self.url))
+
+    def onAction(self, action):
+        if action == ACTION_PREVIOUS_MENU:
+            self.close()
 
 
 class UIGameDB(xbmcgui.WindowXML):
@@ -450,7 +463,7 @@ class UIGameDB(xbmcgui.WindowXML):
         for feed in feeds:
             name = feed.firstChild.toxml()
             item = xbmcgui.ListItem(name, name)
-            item.setProperty('xgameId', name)
+            item.setProperty('url', name)
             #item.setProperty(util.IMAGE_CONTROL_BACKGROUND, '/home/media/ninja-parade.png')
             #item.setProperty(util.IMAGE_CONTROL_GAMEINFO_BIG, '/home/media/ninja-parade.png')
             self.addItem(item)
@@ -568,15 +581,14 @@ class UIGameDB(xbmcgui.WindowXML):
             Logutil.log("selectedGame == None in launchEmu", util.LOG_LEVEL_WARNING)
             return
                     
-        gameId = selectedGame.getProperty('gameId')
-        Logutil.log("launching game with id: " + str(gameId), util.LOG_LEVEL_INFO)
+        url = selectedGame.getProperty('url')
+        Logutil.log("launching game with url: " + str(url), util.LOG_LEVEL_INFO)
         
-        #stop video (if playing)
-        if(self.player.isPlayingVideo()):
-            #self.player.stoppedByRCB = True
-            self.player.stop()
-        
-        launcher.launchEmu(self.gdb, self, gameId, self.config, self.Settings, selectedGame)
+        window = PopupWindow(url=url)
+        window.doModal()
+        del window
+   
+        #launcher.launchEmu(self.gdb, self, gameId, self.config, self.Settings, selectedGame)
         Logutil.log("End launchEmu" , util.LOG_LEVEL_INFO)
         
         
