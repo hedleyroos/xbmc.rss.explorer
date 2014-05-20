@@ -1,13 +1,6 @@
 import os
-import urllib2
-import threading
 import simplejson
 import datetime
-from xml.dom.minidom import parse
-from time import sleep, mktime
-
-import BeautifulSoup
-import feedparser
 
 import xbmc, xbmcgui, xbmcaddon
 
@@ -23,80 +16,8 @@ CONTROL_LABEL_MSG = 4000
 # Action ids
 ACTION_PREVIOUS_MENU = 10
 
-USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:26.0) Gecko/20100101 Firefox/26.0"
-
+json_path = xbmc.translatePath('special://userdata/RssExplorer.json').decode('utf-8')
 _articles = {}
-
-
-class FetchThread(threading.Thread):
-
-    def __init__(self, *args, **kwargs):
-        self.feeds_path = xbmc.translatePath('special://userdata/RssFeeds.xml').decode('utf-8')
-        self.json_path = xbmc.translatePath('special://userdata/RssExplorer.json').decode('utf-8')
-        self._running = True
-        super(FetchThread, self).__init__(*args, **kwargs)
-
-    def run(self):
-        global _articles
-        print "RUN RUN RUN %s" % self.feeds_path
-        while self._running:
-            articles = {}
-            for feed in parse(self.feeds_path).getElementsByTagName('feed'):
-                url = feed.firstChild.toxml()
-                print url
-                parsed = feedparser.parse(url, agent=USER_AGENT)
-                for entry in parsed.entries:
-                    print entry.link
-
-                    # Have we already processed this item?
-                    if entry.link in _articles:
-                        articles[entry.link] = _articles[entry.link]
-                        continue
-
-                    # Fetch the link
-                    request = urllib2.Request(
-                        entry.link, headers={'User-Agent': USER_AGENT}
-                    )
-                    try:
-                        response = urllib2.urlopen(request)
-                    except urllib2.HTTPError:
-                        continue
-
-                    # Extract content
-                    more_soup = BeautifulSoup.BeautifulSoup(response.read())
-                    #node = more_soup.select(feed.css_content_selector)
-                    node = more_soup
-                    if not node:
-                        continue
-                    content = node[0].renderContents()
-
-                    # Add
-                    print entry
-                    date = getattr(entry, 'published_parsed', None) \
-                        or getattr(entry, 'updated_parsed', None) \
-                        or now_struct
-                    date = mktime(date)
-                    articles[entry.link] = {
-                        'url': entry.link,
-                        'date': date, 
-                        'title': entry.title, 
-                        'description': entry.description, 
-                        'content': content
-                    }
-
-            # Write to file
-            fp = open(window.json_path, 'w')
-            try:
-                fp.write(simplejson.dumps(articles))
-            finally:
-                fp.close()
-
-            # Sleep
-            #sleep(600)
-            self._running = False
-
-    def kill(self):
-        self._running = False
 
 
 class PopupWindow(xbmcgui.Window):
@@ -115,14 +36,10 @@ class UIGameDB(xbmcgui.WindowXML):
         
     def onInit(self):
         print "ON INIT"
-        self.feeds_path = xbmc.translatePath('special://userdata/RssFeeds.xml').decode('utf-8')
-        self.json_path = xbmc.translatePath('special://userdata/RssExplorer.json').decode('utf-8')
         self._articles = {}
         self._sorted_articles = []
 
         xbmc.sleep(util.WAITTIME_UPDATECONTROLS)
-
-        #self.cache_articles()
 
         self.showArticles()
         
@@ -139,64 +56,14 @@ class UIGameDB(xbmcgui.WindowXML):
     def onFocus(self, controlId):
         self.selectedControlId = controlId
 
-    def cache_articles(self):
-        now_struct = datetime.datetime.now().timetuple()
-        articles = {}
-        for feed in parse(self.feeds_path).getElementsByTagName('feed'):
-            url = feed.firstChild.toxml()
-            parsed = feedparser.parse(url, agent=USER_AGENT)
-            for entry in parsed.entries:
-
-                # Have we already processed this item?
-                if entry.link in self._articles:
-                    articles[entry.link] = self._articles[entry.link]
-                    continue
-
-                # Fetch the link
-                request = urllib2.Request(
-                    entry.link, headers={'User-Agent': USER_AGENT}
-                )
-                try:
-                    response = urllib2.urlopen(request, timeout=30)
-                except urllib2.HTTPError:
-                    continue
-
-                # Extract content
-                more_soup = BeautifulSoup.BeautifulSoup(response.read())
-                #node = more_soup.select(feed.css_content_selector)
-                node = [more_soup]
-                if not node:
-                    continue
-                content = node[0].renderContents()
-
-                # Add
-                print entry
-                date = getattr(entry, 'published_parsed', None) \
-                    or getattr(entry, 'updated_parsed', None) \
-                    or now_struct
-                date = mktime(date)
-                articles[entry.link] = {
-                    'date': date,
-                    'title': entry.title, 
-                    'description': entry.description, 
-                    'content': content
-                }
-
-        # Write to file
-        fp = open(self.json_path, 'w')
-        try:
-            fp.write(simplejson.dumps(articles))
-        finally:
-            fp.close()
-
     @property
     def articles(self):
         global _articles
         if _articles:
             return _articles
 
-        if os.path.exists(self.json_path):
-            fp = open(self.json_path, 'r')
+        if os.path.exists(json_path):
+            fp = open(json_path, 'r')
             _articles = simplejson.loads(fp.read())
             fp.close()
 
@@ -270,12 +137,6 @@ class UIGameDB(xbmcgui.WindowXML):
             pass
     
 
-#fetch_thread = FetchThread()
-#fetch_thread.start()
-
 ui = UIGameDB('main.xml', util.getAddonInstallPath())
 ui.doModal()
 del ui
-
-#fetch_thread.kill()
-#del fetch_thread
