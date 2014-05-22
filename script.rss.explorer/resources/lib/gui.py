@@ -16,7 +16,9 @@ CONTROL_LABEL_MSG = 4000
 # Action ids
 ACTION_PREVIOUS_MENU = 10
 
-json_path = xbmc.translatePath('special://userdata/RssExplorer.json').decode('utf-8')
+service_data_path = xbmc.translatePath('special://userdata/addon_data/service.rss.explorer/').decode('utf-8')
+json_path = os.path.join(service_data_path, 'data.json')
+images_path = os.path.join(service_data_path, 'images')
 _articles = {}
 
 
@@ -87,8 +89,13 @@ class UIGameDB(xbmcgui.WindowXML):
         for di in self.sorted_articles:
             item = xbmcgui.ListItem(di['title'], di['title'])
             item.setProperty('url', di['url'])
-            imagemainViewBackground = u'/home/hedley/emulators/zsnes/artwork/boxfront/Super Adventure Island (US).jpg'
-            item.setProperty(util.IMAGE_CONTROL_BACKGROUND, imagemainViewBackground)
+            if di['image_name']:
+                item.setProperty(
+                    util.IMAGE_CONTROL_BACKGROUND, 
+                    os.path.join(images_path, di['image_name'])
+                )
+            #imagemainViewBackground = u'/home/hedley/emulators/zsnes/artwork/boxfront/Super Adventure Island (US).jpg'
+            #item.setProperty(util.IMAGE_CONTROL_BACKGROUND, imagemainViewBackground)
             self.addItem(item)
         #xbmc.executebuiltin("Container.SortDirection")
         self.writeMsg("")

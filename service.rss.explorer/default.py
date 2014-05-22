@@ -31,22 +31,34 @@ import feedparser
 
 
 USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:26.0) Gecko/20100101 Firefox/26.0"
-
+FETCH_EVERY_SECONDS = 600
 
 #xbmc.executebuiltin("XBMC.Notification("+name+","+number+",7000,special://home/addons/script.yaclistener/phone.png)")
 
-def fetch(feeds_path, json_path):
+def fetch(feeds_path, addon_data_path):
 
+    # Paths
+    json_path = os.path.join(addon_data_path, 'data.json')
+    images_path = os.path.join(addon_data_path, 'images')
+
+    # Prepare directories
+    if not os.path.exists(addon_data_path):
+        os.mkdir(addon_data_path)
+    if not os.path.exists(images_path):
+        os.mkdir(images_path)
+
+    # Load current articles
     current_articles = {}
     if os.path.exists(json_path):
         fp = open(json_path, 'r')
         try:
-            _articles = simplejson.loads(fp.read())
+            current_articles = simplejson.loads(fp.read())
         finally:
             fp.close()
 
     now_struct = datetime.datetime.now().timetuple()
     articles = {}
+    counter = 1
     for feed in parse(feeds_path).getElementsByTagName('feed'):
 
         # Abort?
@@ -86,17 +98,48 @@ def fetch(feeds_path, json_path):
                 continue
             content = node[0].renderContents()
 
+            # Fetch image if possible
+            image_name = ''
+            for enclosure in entry.enclosures:
+                if enclosure.type.startswith('image/'):
+                    request = urllib2.Request(
+                        enclosure.href, headers={'User-Agent': USER_AGENT}
+                    )
+                    try:
+                        response = urllib2.urlopen(request, timeout=10)
+                    except urllib2.HTTPError:
+                        pass
+                    else:
+                        # Don't trust filename in URL because FS may struggle
+                        # with eg. unicode filenames.
+                        image_name = urllib2.urlparse.urlparse(
+                            enclosure.href
+                        ).path.split('/')[-1]
+                        image_name ='%s.%s' \
+                            % (hash(image_name), image_name.split('.')[-1])
+                        pth = os.path.join(images_path, image_name)
+                        fp = open(pth, 'wb')
+                        try:
+                            fp.write(response.read())
+                        finally:
+                            fp.close()
+                        break
+
             # Add
             date = getattr(entry, 'published_parsed', None) \
                 or getattr(entry, 'updated_parsed', None) \
                 or now_struct
             date = mktime(date)
+            print "counter = %s" % counter
             articles[entry.link] = {
                 'date': date,
                 'title': entry.title, 
                 'description': entry.description, 
-                'content': content
+                'content': content,
+                'image_name': image_name
             }
+
+            counter += 1
 
     # Write to file
     fp = open(json_path, 'w')
@@ -108,10 +151,10 @@ def fetch(feeds_path, json_path):
 
 if __name__ == '__main__':
     feeds_path = xbmc.translatePath('special://userdata/RssFeeds.xml').decode('utf-8')
-    json_path = xbmc.translatePath('special://userdata/RssExplorer.json').decode('utf-8')
+    addon_data_path = xbmc.translatePath('special://userdata/addon_data/service.rss.explorer/').decode('utf-8')
     counter = 0
     while not xbmc.abortRequested:
-        if counter % 600 == 0:
-            fetch(feeds_path, json_path)
+        if counter % FETCH_EVERY_SECONDS == 0:
+            fetch(feeds_path, addon_data_path)
         xbmc.sleep(1000)
         counter += 1
