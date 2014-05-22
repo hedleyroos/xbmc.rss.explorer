@@ -90,16 +90,13 @@ class UIGameDB(xbmcgui.WindowXML):
             item = xbmcgui.ListItem(di['title'], di['title'])
             item.setProperty('url', di['url'])
             if di['image_name']:
-                item.setProperty(
-                    util.IMAGE_CONTROL_BACKGROUND, 
-                    os.path.join(images_path, di['image_name'])
-                )
-            #imagemainViewBackground = u'/home/hedley/emulators/zsnes/artwork/boxfront/Super Adventure Island (US).jpg'
-            #item.setProperty(util.IMAGE_CONTROL_BACKGROUND, imagemainViewBackground)
+                pth = os.path.join(images_path, di['image_name'])
+                item.setProperty(util.IMAGE_CONTROL_BACKGROUND, pth)
+                item.setProperty(util.IMAGE_CONTROL_GAMEINFO_BIG, pth)
             self.addItem(item)
         #xbmc.executebuiltin("Container.SortDirection")
         self.writeMsg("")
-        
+       
     def launchEmu(self):
         if not self.getListSize():
             return
