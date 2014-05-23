@@ -66,3 +66,24 @@ def getAddonDataPath():
 
 def getAddonInstallPath():
 	return __addon__.getAddonInfo('path')
+
+
+def clean_content(content):
+    """Convert and strip markup. Bleach pulls in too many dependencies so fall
+    back to regex."""
+    # Strip linebreaks
+    s = content.replace('\n', ' ')
+    # Collapse whitespace
+    s = re.sub(' +', ' ', s)
+    # Make br's linebreaks
+    s = s.replace('<br>', '\n')
+    s = s.replace('<br />', '\n')
+    s = s.replace('<br/>', '\n')
+    # Prep paragraphs to become breaks
+    s = s.replace('<p', '\n<p')
+    # Collapse linebreaks
+    s = re.sub('\n+', '\n', s)
+    # Strip all tags
+    # todo: beautifulsoup is easy to pull in, so perhaps use that
+    s = re.sub('<[^>]*>', '', s)
+    return s

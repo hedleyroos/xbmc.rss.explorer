@@ -26,8 +26,19 @@ class PopupWindow(xbmcgui.Window):
 
     def __init__(self, *args, **kwargs):
         super(PopupWindow, self).__init__(*args, **kwargs)
-        self.url = kwargs.pop('url')
-        self.addControl(xbmcgui.ControlLabel(x=190, y=25, width=500, height=25, label="Noooo " + self.url))
+        #url = kwargs.pop('url')
+        #content = util.clean_content(_articles.get(url, {}).get('content'))
+        content = "ahaha"
+        #self.addControl(xbmcgui.ControlLabel(x=190, y=25, width=500, height=25, label=content))
+        ctrl = xbmcgui.ControlLabel(x=190, y=25, width=500, height=25)
+        ctrl.setLabel('mmmmmmmmmmm')
+
+        #ctrl = xbmcgui.ControlTextBox(x=0, y=0, width=500, height=200)
+        #ctrl.setText('xxxxxxxxxxxx'+content)
+        #ctrl.setText("this is text")
+        self.addControl(ctrl)
+
+
 
     def onAction(self, action):
         if action == ACTION_PREVIOUS_MENU:

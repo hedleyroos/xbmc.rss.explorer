@@ -121,7 +121,7 @@ def fetch(feeds_path, addon_data_path):
                 node = [soup]
             if not node:
                 continue
-            content = node[0].renderContents()
+            content = ' '.join([unicode(n).strip() for n in node])
 
             # Fetch image if possible
             image_name = ''
@@ -137,11 +137,10 @@ def fetch(feeds_path, addon_data_path):
                     else:
                         # Don't trust filename in URL because FS may struggle
                         # with eg. unicode filenames.
-                        image_name = urllib2.urlparse.urlparse(
+                        extension = urllib2.urlparse.urlparse(
                             enclosure.href
-                        ).path.split('/')[-1]
-                        image_name ='%s.%s' \
-                            % (hash(image_name), image_name.split('.')[-1])
+                        ).path.split('/')[-1].split('.')[-1]
+                        image_name ='%s.%s' % (hash(enclosure.href), extension)
                         pth = os.path.join(images_path, image_name)
                         fp = open(pth, 'wb')
                         try:
@@ -172,6 +171,14 @@ def fetch(feeds_path, addon_data_path):
         fp.write(simplejson.dumps(articles, indent=4))
     finally:
         fp.close()
+
+    # Remove stale images
+    for k, v in current_articles.items():
+        if v['image_name'] and (k not in articles):
+            try:
+                os.remove(os.path.join(images_path, v['image_name']))
+            except IOError:
+                pass
 
 
 if __name__ == '__main__':
