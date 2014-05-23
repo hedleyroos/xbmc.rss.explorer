@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon
-  id="script.rss.explorer"
-  version="0.1"
-  name="RSS Explorer"
-  provider-name="hedleyroos">
-  <requires>
-    <import addon="xbmc.python" version="2.1.0"/>
-    <import addon="script.rss.editor" version="2.0.3"/>
-    <import addon="service.rss.explorer" version="0.1" />
-  </requires>
-  <extension point="xbmc.python.script" library="default.py">
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <language></language>
-    <platform>all</platform>
-    <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
-    <forum></forum>
-    <website>https://github.com/hedleyroos/script.rss.explorer</website>
-    <source>https://github.com/hedleyroos/script.rss.explorer</source>
-    <summary lang="en">View content detail in RSS feeds</summary>
-    <description lang="en">Description</description>
-  </extension>
+    id="script.rss.explorer"
+    version="0.1"
+    name="RSS Explorer"
+    provider-name="hedleyroos">
+    <requires>
+        <import addon="xbmc.python" version="2.1.0"/>
+        <import addon="script.rss.editor" version="2.0.3"/>
+        <import addon="service.rss.explorer" version="0.1" />
+    </requires>
+    <extension point="xbmc.python.script" library="default.py">
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <language></language>
+        <platform>all</platform>
+        <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+        <forum></forum>
+        <website>https://github.com/hedleyroos/script.rss.explorer</website>
+        <source>https://github.com/hedleyroos/script.rss.explorer</source>
+        <summary lang="en">View content detail for RSS feeds defined in RSS Editor</summary>
+        <description lang="en">Description</description>
+    </extension>
 </addon>
