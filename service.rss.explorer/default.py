@@ -110,11 +110,7 @@ def fetch(feeds_path, addon_data_path):
             soup = bs4.BeautifulSoup(response.read())
             # Do we have info for this domain?
             domain = urllib2.urlparse.urlparse(actual_url).netloc
-            print "au = %s, domain = %s" % (actual_url, domain)
-            print "selector = %s" % domain_info[domain]['selector']
-            #print "soup = %s" % soup
             if domain in domain_info:
-                print "DO CSS SELECTOR"
                 node = soup.select(domain_info[domain]['selector'])
             else:
                 # todo: fall back to readability

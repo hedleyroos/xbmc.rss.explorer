@@ -8,13 +8,19 @@ import util
 
 
 # Control ids
-GAME_LISTS = (50, 51, 52, 53, 54, 55, 56, 57, 58)
-CONTROL_SCROLLBARS = (2200, 2201, 60, 61, 62)
-CONTROL_GAMES_GROUP_START = 50
+CONTROL_LIST_NAVIGATOR = 52
+CONTROL_SCROLLBARS = (61, 8889)
 CONTROL_LABEL_MSG = 4000
+CONTROL_GROUP_DETAIL = 201
+CONTROL_TEXTBOX_DETAIL = 8888
 
 # Action ids
+# https://github.com/xbmc/xbmc/blob/master/xbmc/guilib/Key.h
 ACTION_PREVIOUS_MENU = 10
+ACTION_MOVE_UP = 3
+ACTION_MOVE_DOWN = 4
+ACTION_PAGE_UP = 5
+ACTION_PAGE_DOWN = 6
 
 service_data_path = xbmc.translatePath('special://userdata/addon_data/service.rss.explorer/').decode('utf-8')
 json_path = os.path.join(service_data_path, 'data.json')
@@ -22,48 +28,29 @@ images_path = os.path.join(service_data_path, 'images')
 _articles = {}
 
 
-class PopupWindow(xbmcgui.Window):
-
-    def __init__(self, *args, **kwargs):
-        super(PopupWindow, self).__init__(*args, **kwargs)
-        #url = kwargs.pop('url')
-        #content = util.clean_content(_articles.get(url, {}).get('content'))
-        content = "ahaha"
-        #self.addControl(xbmcgui.ControlLabel(x=190, y=25, width=500, height=25, label=content))
-        ctrl = xbmcgui.ControlLabel(x=190, y=25, width=500, height=25)
-        ctrl.setLabel('mmmmmmmmmmm')
-
-        #ctrl = xbmcgui.ControlTextBox(x=0, y=0, width=500, height=200)
-        #ctrl.setText('xxxxxxxxxxxx'+content)
-        #ctrl.setText("this is text")
-        self.addControl(ctrl)
-
-
-
-    def onAction(self, action):
-        if action == ACTION_PREVIOUS_MENU:
-            self.close()
-
-
-class UIGameDB(xbmcgui.WindowXML):
+class MainWindow(xbmcgui.WindowXML):
         
     def onInit(self):
-        print "ON INIT"
         self._articles = {}
         self._sorted_articles = []
+        self.viewing_detail = False
 
         xbmc.sleep(util.WAITTIME_UPDATECONTROLS)
 
+        # Hide detail panel
+        self.getControlById(CONTROL_TEXTBOX_DETAIL).setVisible(False)
+
+        # Load articles into navigator
         self.showArticles()
         
-        # Always set focus on game list on start
-        ctrl = self.getControlById(CONTROL_GAMES_GROUP_START)
+        # Focus navigator on start
+        ctrl = self.getControlById(CONTROL_LIST_NAVIGATOR)
         if ctrl is not None:
             self.setFocus(ctrl)
 
     def onClick(self, controlId):
         #print "onClick: " + str(controlId)
-        if (controlId in GAME_LISTS):
+        if controlId == CONTROL_LIST_NAVIGATOR:
             self.launchEmu()
 
     def onFocus(self, controlId):
@@ -95,7 +82,7 @@ class UIGameDB(xbmcgui.WindowXML):
 
     def showArticles(self):
         self.clearList()
-        self.writeMsg("Loading articles...")
+        xbmc.executebuiltin('Notification(Loading articles,,/icon.png)')
 
         for di in self.sorted_articles:
             item = xbmcgui.ListItem(di['title'], di['title'])
@@ -103,48 +90,56 @@ class UIGameDB(xbmcgui.WindowXML):
             if di['image_name']:
                 pth = os.path.join(images_path, di['image_name'])
                 item.setProperty(util.IMAGE_CONTROL_BACKGROUND, pth)
-                item.setProperty(util.IMAGE_CONTROL_GAMEINFO_BIG, pth)
+                item.setProperty(util.IMAGE_CONTROL_ARTICLEINFO_BIG, pth)
+                content = util.clean_content(di['content'])
+                item.setProperty('content', content)
+                description = util.clean_content(di['description'])
+                item.setProperty('description', description)
+                item.setProperty(
+                    'date', 
+                    datetime.datetime.utcfromtimestamp(
+                        di['date']
+                    ).strftime('%d %B %Y %H:%I')
+                )
             self.addItem(item)
         #xbmc.executebuiltin("Container.SortDirection")
         self.writeMsg("")
        
+    def onAction(self, action):
+        if action == ACTION_PREVIOUS_MENU:
+            if self.viewing_detail:
+                ctrl = self.getControlById(CONTROL_LIST_NAVIGATOR)
+                ctrl.setVisible(True)
+                self.setFocus(ctrl)
+                self.getControlById(CONTROL_TEXTBOX_DETAIL).setVisible(False)
+                self.viewing_detail = False
+            else:
+                self.close()
+
     def launchEmu(self):
         if not self.getListSize():
             return
 
-        pos = self.getCurrentListPosition()
-        if pos == -1:
-            pos = 0
-        selectedGame = self.getListItem(pos)
-        
-        if not selectedGame:
-            return
-                    
-        url = selectedGame.getProperty('url')
-        window = PopupWindow(url=url)
-        window.doModal()
-        del window
+        # Make detail panel visible, focus control group
+        self.getControlById(CONTROL_TEXTBOX_DETAIL).setVisible(True)
+        ctrl = self.getControlById(CONTROL_GROUP_DETAIL)
+        self.setFocus(ctrl)
+        self.getControlById(CONTROL_LIST_NAVIGATOR).setVisible(False)
+        self.viewing_detail = True
 
-        self.setCurrentListPosition(pos)
-    
-    def exit(self):             
-        self.close()
-
-    # Helper methods 
     def getControlById(self, controlId):
         try:
             control = self.getControl(controlId)
         except Exception, (exc):
-            # There seems to be a problem with recognizing the scrollbar controls
-            if(controlId not in (CONTROL_SCROLLBARS)):
-                #print "Control with id: %s could not be found. Check WindowXML file. Error: %s" % (str(controlId), str(exc))
-                self.writeMsg(util.localize(35025) % str(controlId))
+            # getControl ignores scrollbar controls
+            if (controlId not in (CONTROL_SCROLLBARS)):
+                raise
             return None
         return control
     
     def writeMsg(self, msg, count=0):
         control = self.getControlById(CONTROL_LABEL_MSG)
-        if(control == None):
+        if control is None:
             return
         try:
             control.setLabel(msg)
@@ -152,6 +147,6 @@ class UIGameDB(xbmcgui.WindowXML):
             pass
     
 
-ui = UIGameDB('main.xml', util.getAddonInstallPath())
-ui.doModal()
-del ui
+window = MainWindow('main.xml', util.getAddonInstallPath())
+window.doModal()
+del window

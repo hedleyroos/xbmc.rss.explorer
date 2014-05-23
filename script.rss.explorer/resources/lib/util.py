@@ -24,23 +24,7 @@ LOG_LEVEL_DEBUG = 3
 CURRENT_LOG_LEVEL = LOG_LEVEL_INFO
 
 IMAGE_CONTROL_BACKGROUND = 'background'
-IMAGE_CONTROL_GAMELIST = 'gamelist'
-IMAGE_CONTROL_GAMELISTSELECTED = 'gamelistselected'
-IMAGE_CONTROL_GAMEINFO_BIG = 'gameinfobig'
-
-IMAGE_CONTROL_GAMEINFO_UPPERLEFT = 'gameinfoupperleft'
-IMAGE_CONTROL_GAMEINFO_UPPERRIGHT = 'gameinfoupperright'
-IMAGE_CONTROL_GAMEINFO_LOWERLEFT = 'gameinfolowerleft'
-IMAGE_CONTROL_GAMEINFO_LOWERRIGHT = 'gameinfolowerright'
-
-IMAGE_CONTROL_GAMEINFO_UPPER = 'gameinfoupper'
-IMAGE_CONTROL_GAMEINFO_LOWER = 'gameinfolower'
-IMAGE_CONTROL_GAMEINFO_LEFT = 'gameinfoleft'
-IMAGE_CONTROL_GAMEINFO_RIGHT = 'gameinforight'
-
-IMAGE_CONTROL_1 = 'extraImage1'
-IMAGE_CONTROL_2 = 'extraImage2'
-IMAGE_CONTROL_3 = 'extraImage3'
+IMAGE_CONTROL_ARTICLEINFO_BIG = 'articleinfobig'
 
 
 def getEnvironment():
@@ -80,10 +64,10 @@ def clean_content(content):
     s = s.replace('<br />', '\n')
     s = s.replace('<br/>', '\n')
     # Prep paragraphs to become breaks
-    s = s.replace('<p', '\n<p')
+    s = s.replace('<p', '\n\n<p')
     # Collapse linebreaks
-    s = re.sub('\n+', '\n', s)
+    #s = re.sub('\n+', '\n', s)
     # Strip all tags
     # todo: beautifulsoup is easy to pull in, so perhaps use that
-    s = re.sub('<[^>]*>', '', s)
-    return s
+    s = re.sub(r'<[^>]*>', '', s)
+    return s.strip()
