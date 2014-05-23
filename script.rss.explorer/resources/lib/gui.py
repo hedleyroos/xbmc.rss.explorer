@@ -91,16 +91,16 @@ class MainWindow(xbmcgui.WindowXML):
                 pth = os.path.join(images_path, di['image_name'])
                 item.setProperty(util.IMAGE_CONTROL_BACKGROUND, pth)
                 item.setProperty(util.IMAGE_CONTROL_ARTICLEINFO_BIG, pth)
-                content = util.clean_content(di['content'])
-                item.setProperty('content', content)
-                description = util.clean_content(di['description'])
-                item.setProperty('description', description)
-                item.setProperty(
-                    'date', 
-                    datetime.datetime.utcfromtimestamp(
-                        di['date']
-                    ).strftime('%d %B %Y %H:%I')
-                )
+            content = util.clean_content(di['content'])
+            item.setProperty('content', content)
+            description = util.clean_content(di['description'])
+            item.setProperty('description', description)
+            item.setProperty(
+                'date', 
+                datetime.datetime.utcfromtimestamp(
+                    di['date']
+                ).strftime('%d %B %Y %H:%I')
+            )
             self.addItem(item)
         #xbmc.executebuiltin("Container.SortDirection")
         self.writeMsg("")
