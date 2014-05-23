@@ -26,8 +26,8 @@ from time import mktime
 
 import xbmc, xbmcaddon
 
-import BeautifulSoup
 import feedparser
+import bs4
 
 
 USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:26.0) Gecko/20100101 Firefox/26.0"
@@ -38,7 +38,8 @@ FETCH_EVERY_SECONDS = 600
 def fetch(feeds_path, addon_data_path):
 
     # Paths
-    json_path = os.path.join(addon_data_path, 'data.json')
+    data_json = os.path.join(addon_data_path, 'data.json')
+    domain_json = os.path.join(addon_data_path, 'domain.json')
     images_path = os.path.join(addon_data_path, 'images')
 
     # Prepare directories
@@ -49,10 +50,19 @@ def fetch(feeds_path, addon_data_path):
 
     # Load current articles
     current_articles = {}
-    if os.path.exists(json_path):
-        fp = open(json_path, 'r')
+    if os.path.exists(data_json):
+        fp = open(data_json, 'r')
         try:
             current_articles = simplejson.loads(fp.read())
+        finally:
+            fp.close()
+
+    # Load domain info
+    domain_info = {}
+    if os.path.exists(domain_json):
+        fp = open(domain_json, 'r')
+        try:
+            domain_info = simplejson.loads(fp.read())
         finally:
             fp.close()
 
@@ -90,10 +100,25 @@ def fetch(feeds_path, addon_data_path):
             except urllib2.HTTPError:
                 continue
 
+            # Some feeds redirect so get real url
+            actual_url = response.geturl()
+            if actual_url in current_articles:
+                articles[actual_url] = current_articles[actual_url]
+                continue
+
             # Extract content
-            more_soup = BeautifulSoup.BeautifulSoup(response.read())
-            #node = more_soup.select(feed.css_content_selector)
-            node = [more_soup]
+            soup = bs4.BeautifulSoup(response.read())
+            # Do we have info for this domain?
+            domain = urllib2.urlparse.urlparse(actual_url).netloc
+            print "au = %s, domain = %s" % (actual_url, domain)
+            print "selector = %s" % domain_info[domain]['selector']
+            #print "soup = %s" % soup
+            if domain in domain_info:
+                print "DO CSS SELECTOR"
+                node = soup.select(domain_info[domain]['selector'])
+            else:
+                # todo: fall back to readability
+                node = [soup]
             if not node:
                 continue
             content = node[0].renderContents()
@@ -131,7 +156,7 @@ def fetch(feeds_path, addon_data_path):
                 or now_struct
             date = mktime(date)
             print "counter = %s" % counter
-            articles[entry.link] = {
+            articles[actual_url] = {
                 'date': date,
                 'title': entry.title, 
                 'description': entry.description, 
@@ -142,9 +167,9 @@ def fetch(feeds_path, addon_data_path):
             counter += 1
 
     # Write to file
-    fp = open(json_path, 'w')
+    fp = open(data_json, 'w')
     try:
-        fp.write(simplejson.dumps(articles))
+        fp.write(simplejson.dumps(articles, indent=4))
     finally:
         fp.close()
 
