@@ -24,6 +24,7 @@ ACTION_MOVE_DOWN = 4
 ACTION_PAGE_UP = 5
 ACTION_PAGE_DOWN = 6
 ACTION_NAV_BACK = 92
+ACTION_STOP = 13
 
 service_data_path = xbmc.translatePath('special://userdata/addon_data/service.rss.explorer/').decode('utf-8')
 json_path = os.path.join(service_data_path, 'data.json')
@@ -109,7 +110,10 @@ class MainWindow(xbmcgui.WindowXML):
         self.writeMsg("")
        
     def onAction(self, action):
-        if action == ACTION_PREVIOUS_MENU:
+        if action == ACTION_STOP:
+            self.close()
+
+        elif action == ACTION_PREVIOUS_MENU:
             if self.viewing_detail:
                 ctrl = self.getControlById(CONTROL_LIST_NAVIGATOR)
                 ctrl.setVisible(True)
