@@ -17,10 +17,13 @@ CONTROL_TEXTBOX_DETAIL = 8888
 # Action ids
 # https://github.com/xbmc/xbmc/blob/master/xbmc/guilib/Key.h
 ACTION_PREVIOUS_MENU = 10
+ACTION_MOVE_LEFT = 1
+ACTION_MOVE_RIGHT = 2
 ACTION_MOVE_UP = 3
 ACTION_MOVE_DOWN = 4
 ACTION_PAGE_UP = 5
 ACTION_PAGE_DOWN = 6
+ACTION_NAV_BACK = 92
 
 service_data_path = xbmc.translatePath('special://userdata/addon_data/service.rss.explorer/').decode('utf-8')
 json_path = os.path.join(service_data_path, 'data.json')
@@ -50,7 +53,7 @@ class MainWindow(xbmcgui.WindowXML):
 
     def onClick(self, controlId):
         #print "onClick: " + str(controlId)
-        if controlId == CONTROL_LIST_NAVIGATOR:
+        if not self.viewing_detail and (controlId == CONTROL_LIST_NAVIGATOR):
             self.launchEmu()
 
     def onFocus(self, controlId):
@@ -115,6 +118,16 @@ class MainWindow(xbmcgui.WindowXML):
                 self.viewing_detail = False
             else:
                 self.close()
+
+        elif self.viewing_detail and (action == ACTION_MOVE_LEFT):
+            ctrl = self.getControlById(CONTROL_LIST_NAVIGATOR)
+            ctrl.setVisible(True)
+            self.setFocus(ctrl)
+            self.getControlById(CONTROL_TEXTBOX_DETAIL).setVisible(False)
+            self.viewing_detail = False
+
+        elif not self.viewing_detail and (action == ACTION_MOVE_RIGHT):
+            self.launchEmu()
 
     def launchEmu(self):
         if not self.getListSize():
