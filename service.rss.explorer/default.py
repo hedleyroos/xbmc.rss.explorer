@@ -33,7 +33,6 @@ import bs4
 USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:26.0) Gecko/20100101 Firefox/26.0"
 FETCH_EVERY_SECONDS = 600
 
-#xbmc.executebuiltin("XBMC.Notification("+name+","+number+",7000,special://home/addons/script.yaclistener/phone.png)")
 
 def fetch(feeds_path, addon_data_path):
 
@@ -54,6 +53,22 @@ def fetch(feeds_path, addon_data_path):
         fp = open(data_json, 'r')
         try:
             current_articles = simplejson.loads(fp.read())
+        finally:
+            fp.close()
+
+    # Fetch latest domain.json file
+    request = urllib2.Request(
+        'https://raw.githubusercontent.com/hedleyroos/xbmc.rss.explorer/develop/domain.json.in'
+        , headers={'User-Agent': USER_AGENT}
+    )
+    try:
+        response = urllib2.urlopen(request, timeout=10)
+    except urllib2.HTTPError:
+        pass
+    else:
+        fp = open(domain_json, 'w')
+        try:
+            fp.write(response.read())
         finally:
             fp.close()
 
@@ -110,14 +125,16 @@ def fetch(feeds_path, addon_data_path):
             soup = bs4.BeautifulSoup(response.read())
             # Do we have info for this domain?
             domain = urllib2.urlparse.urlparse(actual_url).netloc
+            nodes = []
             if domain in domain_info:
-                node = soup.select(domain_info[domain]['selector'])
+                for selector in domain_info[domain]['selector']:
+                    nodes.extend(soup.select(selector))
             else:
                 # todo: fall back to readability
-                node = [soup]
+                nodes = [soup]
             if not node:
                 continue
-            content = ' '.join([unicode(n).strip() for n in node])
+            content = ' '.join([unicode(n).strip() for n in nodes])
 
             # Fetch image if possible
             image_name = ''

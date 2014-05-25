@@ -1,7 +1,7 @@
 {
-    "www.news24.com": {"selector": "div.article > p"},
-    "www.sport24.co.za": {"selector": "div.ss-article-body"},
-    "www.fin24.com": {"selector": "#articleBodyContainer"},
-    "www.slashdot.org": {"selector": "div.body > div.p"},
-    "xbmc.org": {"selector": "div.post"}
+    "www.news24.com": {"selectors": ["div.article > p"]},
+    "www.sport24.co.za": {"selectors": ["div.ss-article-body"]},
+    "www.fin24.com": {"selectors": ["#articleBodyContainer"]},
+    "www.slashdot.org": {"selectors": ["div.body > div.p"]},
+    "xbmc.org": {"selectors": ["div.post"]}
 }
