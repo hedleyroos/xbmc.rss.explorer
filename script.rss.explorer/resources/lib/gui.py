@@ -27,8 +27,10 @@ ACTION_NAV_BACK = 92
 ACTION_STOP = 13
 
 service_data_path = xbmc.translatePath('special://userdata/addon_data/service.rss.explorer/').decode('utf-8')
-json_path = os.path.join(service_data_path, 'data.json')
+data_json = os.path.join(service_data_path, 'data.json')
+domain_json = os.path.join(service_data_path, 'domain.json')
 images_path = os.path.join(service_data_path, 'images')
+html_path = os.path.join(service_data_path, 'html')
 _articles = {}
 
 
@@ -66,8 +68,8 @@ class MainWindow(xbmcgui.WindowXML):
         if _articles:
             return _articles
 
-        if os.path.exists(json_path):
-            fp = open(json_path, 'r')
+        if os.path.exists(data_json):
+            fp = open(data_json, 'r')
             _articles = simplejson.loads(fp.read())
             fp.close()
 
@@ -88,6 +90,8 @@ class MainWindow(xbmcgui.WindowXML):
         self.clearList()
         xbmc.executebuiltin('Notification(Loading articles,,/icon.png)')
 
+        convertor = util.Convertor()
+        counter = 1
         for di in self.sorted_articles:
             item = xbmcgui.ListItem(di['title'], di['title'])
             item.setProperty('url', di['url'])
@@ -95,9 +99,12 @@ class MainWindow(xbmcgui.WindowXML):
                 pth = os.path.join(images_path, di['image_name'])
                 item.setProperty(util.IMAGE_CONTROL_BACKGROUND, pth)
                 item.setProperty(util.IMAGE_CONTROL_ARTICLEINFO_BIG, pth)
-            content = util.html2text(di['content'])
+            content = convertor.file2text(
+                di['url'],
+                os.path.join(html_path, di['html_name'])
+            )
             item.setProperty('content', content)
-            description = util.html2text(di['description'])
+            description = convertor.html2text(di['url'], di['description'])
             item.setProperty('description', description)
             item.setProperty(
                 'date', 
@@ -106,6 +113,9 @@ class MainWindow(xbmcgui.WindowXML):
                 ).strftime('%d %B %Y %H:%I')
             )
             self.addItem(item)
+            counter += 1
+            #if counter > 2:
+            #    break
         #xbmc.executebuiltin("Container.SortDirection")
         self.writeMsg("")
        
