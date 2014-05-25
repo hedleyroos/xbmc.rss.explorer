@@ -95,9 +95,9 @@ class MainWindow(xbmcgui.WindowXML):
                 pth = os.path.join(images_path, di['image_name'])
                 item.setProperty(util.IMAGE_CONTROL_BACKGROUND, pth)
                 item.setProperty(util.IMAGE_CONTROL_ARTICLEINFO_BIG, pth)
-            content = util.clean_content(di['content'])
+            content = util.html2text(di['content'])
             item.setProperty('content', content)
-            description = util.clean_content(di['description'])
+            description = util.html2text(di['description'])
             item.setProperty('description', description)
             item.setProperty(
                 'date', 

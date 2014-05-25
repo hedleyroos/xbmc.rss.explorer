@@ -20,6 +20,7 @@
 import os
 import datetime
 import urllib2
+import re
 import simplejson
 from xml.dom.minidom import parse
 from time import mktime
@@ -57,20 +58,23 @@ def fetch(feeds_path, addon_data_path):
             fp.close()
 
     # Fetch latest domain.json file
+    '''
     request = urllib2.Request(
         'https://raw.githubusercontent.com/hedleyroos/xbmc.rss.explorer/develop/domain.json.in'
         , headers={'User-Agent': USER_AGENT}
     )
     try:
         response = urllib2.urlopen(request, timeout=10)
+        data = response.read()
     except urllib2.HTTPError:
         pass
     else:
         fp = open(domain_json, 'w')
         try:
-            fp.write(response.read())
+            fp.write(data)
         finally:
             fp.close()
+    '''
 
     # Load domain info
     domain_info = {}
@@ -112,6 +116,7 @@ def fetch(feeds_path, addon_data_path):
             )
             try:
                 response = urllib2.urlopen(request, timeout=10)
+                data = response.read()
             except urllib2.HTTPError:
                 continue
 
@@ -121,20 +126,35 @@ def fetch(feeds_path, addon_data_path):
                 articles[actual_url] = current_articles[actual_url]
                 continue
 
-            # Extract content
-            soup = bs4.BeautifulSoup(response.read())
+
             # Do we have info for this domain?
-            domain = urllib2.urlparse.urlparse(actual_url).netloc
+            target_domain = urllib2.urlparse.urlparse(actual_url).netloc
+            domain_pattern = None
+            for pattern in domain_info.keys():
+                if re.match(r'%s' % pattern, target_domain):
+                    domain_pattern = pattern
+                    break
+
+            # Extract content
+            soup = bs4.BeautifulSoup(data)
             nodes = []
-            if domain in domain_info:
-                for selector in domain_info[domain]['selector']:
+            if domain_pattern:
+                selectors = domain_info[domain_pattern]['selectors']
+                for selector in selectors:
                     nodes.extend(soup.select(selector))
             else:
                 # todo: fall back to readability
+                selectors = []
                 nodes = [soup]
-            if not node:
+            if not nodes:
                 continue
-            content = ' '.join([unicode(n).strip() for n in nodes])
+            content = '<br /><br />'.join([unicode(n).strip() for n in nodes])
+
+            # Check for html tag
+            if content.find('<html') != -1:
+                print "Extraction failure: %s with selectors %s" \
+                    % (actual_url, str(selectors))
+                continue
 
             # Fetch image if possible
             image_name = ''
@@ -145,6 +165,7 @@ def fetch(feeds_path, addon_data_path):
                     )
                     try:
                         response = urllib2.urlopen(request, timeout=10)
+                        data = response.read()
                     except urllib2.HTTPError:
                         pass
                     else:
@@ -157,7 +178,7 @@ def fetch(feeds_path, addon_data_path):
                         pth = os.path.join(images_path, image_name)
                         fp = open(pth, 'wb')
                         try:
-                            fp.write(response.read())
+                            fp.write(data)
                         finally:
                             fp.close()
                         break
