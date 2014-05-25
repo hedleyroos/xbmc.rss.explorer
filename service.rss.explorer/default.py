@@ -22,6 +22,7 @@ import datetime
 import urllib2
 import re
 import simplejson
+import socket
 from xml.dom.minidom import parse
 from time import mktime
 
@@ -58,7 +59,6 @@ def fetch(feeds_path, addon_data_path):
             fp.close()
 
     # Fetch latest domain.json file
-    '''
     request = urllib2.Request(
         'https://raw.githubusercontent.com/hedleyroos/xbmc.rss.explorer/develop/domain.json.in'
         , headers={'User-Agent': USER_AGENT}
@@ -66,7 +66,7 @@ def fetch(feeds_path, addon_data_path):
     try:
         response = urllib2.urlopen(request, timeout=10)
         data = response.read()
-    except urllib2.HTTPError:
+    except (urllib2.HTTPError, socket.timeout):
         pass
     else:
         fp = open(domain_json, 'w')
@@ -74,7 +74,6 @@ def fetch(feeds_path, addon_data_path):
             fp.write(data)
         finally:
             fp.close()
-    '''
 
     # Load domain info
     domain_info = {}
@@ -117,7 +116,7 @@ def fetch(feeds_path, addon_data_path):
             try:
                 response = urllib2.urlopen(request, timeout=10)
                 data = response.read()
-            except urllib2.HTTPError:
+            except (urllib2.HTTPError, socket.timeout):
                 continue
 
             # Some feeds redirect so get real url
@@ -166,7 +165,7 @@ def fetch(feeds_path, addon_data_path):
                     try:
                         response = urllib2.urlopen(request, timeout=10)
                         data = response.read()
-                    except urllib2.HTTPError:
+                    except (urllib2.HTTPError, socket.timeout):
                         pass
                     else:
                         # Don't trust filename in URL because FS may struggle
