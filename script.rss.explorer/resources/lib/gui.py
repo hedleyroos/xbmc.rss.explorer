@@ -40,6 +40,7 @@ class MainWindow(xbmcgui.WindowXML):
         self._articles = {}
         self._sorted_articles = []
         self.viewing_detail = False
+        self.convertor = util.Convertor()
 
         xbmc.sleep(util.WAITTIME_UPDATECONTROLS)
 
@@ -47,7 +48,7 @@ class MainWindow(xbmcgui.WindowXML):
         self.getControlById(CONTROL_TEXTBOX_DETAIL).setVisible(False)
 
         # Load articles into navigator
-        self.showArticles()
+        self.listArticles()
         
         # Focus navigator on start
         ctrl = self.getControlById(CONTROL_LIST_NAVIGATOR)
@@ -57,7 +58,7 @@ class MainWindow(xbmcgui.WindowXML):
     def onClick(self, controlId):
         #print "onClick: " + str(controlId)
         if not self.viewing_detail and (controlId == CONTROL_LIST_NAVIGATOR):
-            self.launchEmu()
+            self.showArticle()
 
     def onFocus(self, controlId):
         self.selectedControlId = controlId
@@ -86,25 +87,20 @@ class MainWindow(xbmcgui.WindowXML):
         li.sort(lambda a,b: cmp(b['date'], a['date']))
         return li
 
-    def showArticles(self):
+    def listArticles(self):
         self.clearList()
         xbmc.executebuiltin('Notification(Loading articles,,/icon.png)')
 
-        convertor = util.Convertor()
         counter = 1
         for di in self.sorted_articles:
             item = xbmcgui.ListItem(di['title'], di['title'])
             item.setProperty('url', di['url'])
+            item.setProperty('html_name', di['html_name'])
             if di['image_name']:
                 pth = os.path.join(images_path, di['image_name'])
                 item.setProperty(util.IMAGE_CONTROL_BACKGROUND, pth)
                 item.setProperty(util.IMAGE_CONTROL_ARTICLEINFO_BIG, pth)
-            content = convertor.file2text(
-                di['url'],
-                os.path.join(html_path, di['html_name'])
-            )
-            item.setProperty('content', content)
-            description = convertor.html2text(di['url'], di['description'])
+            description = self.convertor.html2text(di['url'], di['description'])
             item.setProperty('description', description)
             item.setProperty(
                 'date', 
@@ -114,9 +110,6 @@ class MainWindow(xbmcgui.WindowXML):
             )
             self.addItem(item)
             counter += 1
-            #if counter > 2:
-            #    break
-        #xbmc.executebuiltin("Container.SortDirection")
         self.writeMsg("")
        
     def onAction(self, action):
@@ -134,6 +127,7 @@ class MainWindow(xbmcgui.WindowXML):
                 self.close()
 
         elif self.viewing_detail and (action == ACTION_MOVE_LEFT):
+            # todo: condense and use conditions in xml template
             ctrl = self.getControlById(CONTROL_LIST_NAVIGATOR)
             ctrl.setVisible(True)
             self.setFocus(ctrl)
@@ -141,18 +135,37 @@ class MainWindow(xbmcgui.WindowXML):
             self.viewing_detail = False
 
         elif not self.viewing_detail and (action == ACTION_MOVE_RIGHT):
-            self.launchEmu()
+            self.showArticle()
 
-    def launchEmu(self):
+    def showArticle(self):
         if not self.getListSize():
             return
 
+        # Load content if required. Loading is deferred because content may be
+        # large.
+        pos = self.getCurrentListPosition()
+        if pos == -1:
+            pos = 0
+        item = self.getListItem(pos)
+        load = False
+        if not item.getProperty('content'):
+            item.setProperty('content', 'Loading...')
+            load = True
+        
         # Make detail panel visible, focus control group
+        # todo: condense and use conditions in xml template
         self.getControlById(CONTROL_TEXTBOX_DETAIL).setVisible(True)
         ctrl = self.getControlById(CONTROL_GROUP_DETAIL)
         self.setFocus(ctrl)
         self.getControlById(CONTROL_LIST_NAVIGATOR).setVisible(False)
         self.viewing_detail = True
+
+        if load:
+            content = self.convertor.file2text(
+                item.getProperty('url'),
+                os.path.join(html_path, item.getProperty('html_name'))
+            )
+            item.setProperty('content', content)
 
     def getControlById(self, controlId):
         try:
