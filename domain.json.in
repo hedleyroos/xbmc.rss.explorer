@@ -1,7 +1,7 @@
 [
     {"pattern": "www.news24.com", "selectors": ["#article-body > p"]},
 
-    {"pattern": "www.sport24.co.za", "selectors": ["div.ss-article-body"]},
+    {"pattern": "www.sport24.co.za", "selectors": ["div.padding5"]},
 
     {"pattern": "www.fin24.com", "selectors": ["#articleBodyContainer"]},
 
