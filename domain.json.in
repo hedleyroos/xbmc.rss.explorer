@@ -1,23 +1,25 @@
-{
-    "www.news24.com": {"selectors": ["#article-body > p"]},
+[
+    {"pattern": "www.news24.com", "selectors": ["#article-body > p"]},
 
-    "www.sport24.co.za": {"selectors": ["div.ss-article-body"]},
+    {"pattern": "www.sport24.co.za", "selectors": ["div.ss-article-body"]},
 
-    "www.fin24.com": {"selectors": ["#articleBodyContainer"]},
+    {"pattern": "www.fin24.com", "selectors": ["#articleBodyContainer"]},
 
-    "beta.slashdot.org": {
+    {
+        "pattern": "beta.slashdot.org",
         "selectors": [
             "article.layout-article p",
             "#commentlisting div.comment-body"
         ]
     },
 
-    "^[a-zA-Z\\d-]*[\\.]?slashdot.org": {
+    {
+        "pattern": "^[a-zA-Z\\d-]*[\\.]?slashdot.org",
         "selectors": [
             "div.body > div.p",
             "#commentlisting div.cw"
         ]
     },
 
-    "xbmc.org": {"selectors": ["div.post"]}
-}
+    {"pattern": "xbmc.org", "selectors": ["div.post"]}
+]

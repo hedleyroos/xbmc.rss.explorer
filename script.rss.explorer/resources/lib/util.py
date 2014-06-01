@@ -62,11 +62,11 @@ class Convertor:
         domain_json = xbmc.translatePath('special://userdata/addon_data/service.rss.explorer/domain.json').decode('utf-8')
 
         # Load domain info
-        self.domain_info = {}
+        self.domains_info = {}
         if os.path.exists(domain_json):
             fp = open(domain_json, 'r')
             try:
-                self.domain_info = simplejson.loads(fp.read())
+                self.domains_info = simplejson.loads(fp.read())
             finally:
                 fp.close()
 
@@ -78,17 +78,17 @@ class Convertor:
 
             # Do we have info for this domain?
             target_domain = urllib2.urlparse.urlparse(url).netloc
-            domain_pattern = None
-            for pattern in self.domain_info.keys():
-                if re.match(r'%s' % pattern, target_domain):
-                    domain_pattern = pattern
+            domain_definition = None
+            for di in self.domains_info:
+                if re.match(r'%s' % di['pattern'], target_domain):
+                    domain_definition = di
                     break
 
             # Extract content
             soup = bs4.BeautifulSoup(html)
             nodes = []
-            if domain_pattern:
-                selectors = self.domain_info[domain_pattern]['selectors']
+            if domain_definition:
+                selectors = domain_definition['selectors']
                 for selector in selectors:
                     nodes.extend(soup.select(selector))
             else:
