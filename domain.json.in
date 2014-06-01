@@ -3,7 +3,7 @@
 
     {"pattern": "www.sport24.co.za", "selectors": ["div.padding5"]},
 
-    {"pattern": "www.fin24.com", "selectors": ["#articleBodyContainer"]},
+    {"pattern": "www.fin24.com", "selectors": ["#article-body"]},
 
     {
         "pattern": "beta.slashdot.org",
