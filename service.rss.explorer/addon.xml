@@ -13,8 +13,8 @@
     <extension point="xbmc.addon.metadata">
         <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
         <platform>all</platform>
-        <website>https://github.com/hedleyroos/script.rss.explorer</website>
-        <source>https://github.com/hedleyroos/script.rss.explorer</source>
+        <website>https://github.com/hedleyroos/xbmc.rss.explorer</website>
+        <source>https://github.com/hedleyroos/xbmc.rss.explorer</source>
         <forum></forum>
         <summary lang="en">Scrape and cache content detail for RSS feeds defined in RSS Editor</summary>
         <description lang="en">Description</description>

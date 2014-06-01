@@ -16,8 +16,8 @@
         <platform>all</platform>
         <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
         <forum></forum>
-        <website>https://github.com/hedleyroos/script.rss.explorer</website>
-        <source>https://github.com/hedleyroos/script.rss.explorer</source>
+        <website>https://github.com/hedleyroos/xbmc.rss.explorer</website>
+        <source>https://github.com/hedleyroos/xbmc.rss.explorer</source>
         <summary lang="en">View content detail for RSS feeds defined in RSS Editor</summary>
         <description lang="en">Description</description>
     </extension>
