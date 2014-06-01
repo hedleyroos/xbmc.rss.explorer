@@ -1,9 +1,16 @@
 {
-    "www.news24.com": {"selectors": ["div.article > p"]},
+    "www.news24.com": {"selectors": ["#article-body > p"]},
 
     "www.sport24.co.za": {"selectors": ["div.ss-article-body"]},
 
     "www.fin24.com": {"selectors": ["#articleBodyContainer"]},
+
+    "beta.slashdot.org": {
+        "selectors": [
+            "article.layout-article p",
+            "#commentlisting div.comment-body"
+        ]
+    },
 
     "^[a-zA-Z\\d-]*[\\.]?slashdot.org": {
         "selectors": [

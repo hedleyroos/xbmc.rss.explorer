@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2013 Hedley Roos (hedleyroos@gmail.com)
+# Copyright (C) 2014- Hedley Roos (hedleyroos@gmail.com)
 #
 # This program is free software; you can redistribute it and/or modify it under the terms 
 # of the GNU General Public License as published by the Free Software Foundation; 
